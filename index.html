@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Archetypes</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, system-ui, 'SF Pro', sans-serif;
+  background: #fff; color: #1e293b;
+  max-width: 480px; margin: 0 auto;
+  min-height: 100dvh; display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+button { font-family: inherit; }
+input { font-family: inherit; }
+
+/* Header */
+.header { padding: 16px 20px 12px; }
+.header h1 { font-size: 22px; font-weight: 700; color: #0f172a; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid #f1f5f9; }
+.tab {
+  flex: 1; padding: 10px; border: none; background: none;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  color: #94a3b8; border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.tab.active { color: #1e293b; border-bottom-color: #1e293b; }
+
+/* Content */
+.content { flex: 1; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.content.has-fab { padding-bottom: 88px; }
+
+/* Cards */
+.card {
+  padding: 14px 16px; background: #f8fafc; border-radius: 10px;
+  cursor: pointer; transition: background 0.15s; position: relative;
+}
+.card:active { background: #f1f5f9; }
+.card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.card-name { font-size: 15px; font-weight: 500; }
+.card-weight { font-size: 12px; color: #94a3b8; font-weight: 500; }
+.card-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.card-list { display: flex; flex-direction: column; gap: 8px; }
+
+/* Chips */
+.chip {
+  padding: 2px 8px; font-size: 11px; border-radius: 20px;
+  font-weight: 600; display: inline-block; user-select: none;
+}
+.chip-lg { padding: 6px 12px; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+
+/* Menu */
+.menu-btn {
+  background: none; border: none; font-size: 18px; color: #94a3b8;
+  cursor: pointer; padding: 0 2px; line-height: 1;
+}
+.menu-drop {
+  position: absolute; top: 8px; right: 8px; z-index: 10;
+  background: #fff; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  overflow: hidden; min-width: 120px;
+}
+.menu-item {
+  display: block; width: 100%; padding: 10px 16px; background: none;
+  border: none; font-size: 14px; cursor: pointer; text-align: left;
+  color: #334155;
+}
+.menu-item:last-child { border-top: 1px solid #f1f5f9; }
+.menu-item.danger { color: #ef4444; }
+
+/* FAB */
+.fab {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  width: 56px; height: 56px; border-radius: 28px;
+  background: #1e293b; color: #fff; border: none;
+  font-size: 28px; font-weight: 300; cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Overlay & Modal */
+.overlay {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.overlay-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
+.modal {
+  position: relative; width: 100%; max-width: 480px;
+  background: #fff; border-radius: 16px 16px 0 0; padding: 24px 20px 32px;
+}
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-title { font-size: 18px; font-weight: 600; }
+.close-btn { background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 4px; }
+
+/* Fields */
+.field { margin-bottom: 16px; }
+.field-label { display: block; font-size: 13px; font-weight: 500; color: #64748b; margin-bottom: 6px; }
+.field-row { display: flex; gap: 12px; }
+.input {
+  width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0;
+  border-radius: 8px; font-size: 15px; outline: none;
+}
+.input:focus { border-color: #94a3b8; }
+.input-sm { width: 80px; text-align: center; }
+
+/* Buttons */
+.btn-primary {
+  width: 100%; padding: 12px; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  background: #1e293b; color: #fff; transition: all 0.15s;
+}
+.btn-primary:disabled { background: #e2e8f0; color: #94a3b8; cursor: default; }
+
+/* Preview box */
+.preview {
+  background: #f8fafc; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px;
+}
+.preview-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.preview-label { font-size: 13px; color: #64748b; }
+.preview-value { font-size: 20px; font-weight: 700; }
+.preview-split { display: flex; gap: 8px; flex-wrap: wrap; }
+.preview-arch { font-size: 12px; font-weight: 600; }
+
+/* Summary */
+.period-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 20px; -webkit-overflow-scrolling: touch; }
+.period-btn {
+  padding: 6px 12px; border-radius: 20px; border: none; font-size: 12px;
+  font-weight: 500; cursor: pointer; white-space: nowrap;
+  background: #f1f5f9; color: #64748b;
+}
+.period-btn.active { background: #1e293b; color: #fff; }
+
+.stats-row { display: flex; gap: 12px; margin-bottom: 24px; }
+.stat-card { flex: 1; background: #f8fafc; border-radius: 10px; padding: 12px 14px; }
+.stat-val { font-size: 22px; font-weight: 700; }
+.stat-lbl { font-size: 12px; color: #94a3b8; }
+
+.bar-group { display: flex; flex-direction: column; gap: 14px; }
+.bar-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.bar-name { font-size: 14px; font-weight: 500; color: #334155; }
+.bar-pts { font-size: 14px; font-weight: 600; }
+.bar-track { height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+/* History */
+.date-head {
+  font-size: 12px; font-weight: 600; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+.date-group { margin-bottom: 20px; }
+.log-card { padding: 12px 14px; background: #f8fafc; border-radius: 10px; }
+.log-row { display: flex; justify-content: space-between; align-items: center; }
+.log-name { font-size: 14px; font-weight: 500; }
+.log-pts { font-size: 14px; font-weight: 700; }
+.log-detail { font-size: 11px; color: #94a3b8; }
+.log-list { display: flex; flex-direction: column; gap: 6px; }
+
+/* Empty */
+.empty { text-align: center; padding: 48px 20px; color: #94a3b8; }
+.empty-icon { font-size: 32px; margin-bottom: 8px; }
+.empty-text { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header"><h1>Archetypes</h1></div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="templates">Templates</button>
+  <button class="tab" data-tab="history">History</button>
+  <button class="tab" data-tab="summary">Summary</button>
+</div>
+
+<div class="content has-fab" id="content"></div>
+
+<div id="modal-root"></div>
+
+<script>
+// ── Data ──
+const ARCHETYPES = [
+  { id: 'commander', label: 'Commander', color: '#DC2626', bg: '#FEE2E2' },
+  { id: 'geek', label: 'Geek', color: '#2563EB', bg: '#DBEAFE' },
+  { id: 'anchor', label: 'Anchor', color: '#059669', bg: '#D1FAE5' },
+  { id: 'flame', label: 'Flame', color: '#F59E0B', bg: '#FEF3C7' },
+  { id: 'sovereign', label: 'Sovereign', color: '#7C3AED', bg: '#EDE9FE' },
+  { id: 'samurai', label: 'Samurai', color: '#334155', bg: '#E2E8F0' },
+];
+const archMap = Object.fromEntries(ARCHETYPES.map(a => [a.id, a]));
+
+const PERIODS = {
+  week: { label: 'This Week', fn: ts => { const n = new Date(), s = new Date(n); s.setDate(n.getDate()-n.getDay()); s.setHours(0,0,0,0); return ts >= s.getTime(); }},
+  month: { label: 'This Month', fn: ts => { const n = new Date(); return ts >= new Date(n.getFullYear(), n.getMonth(), 1).getTime(); }},
+  lastMonth: { label: 'Last Month', fn: ts => { const n = new Date(); const s = new Date(n.getFullYear(), n.getMonth()-1, 1), e = new Date(n.getFullYear(), n.getMonth(), 1); return ts >= s.getTime() && ts < e.getTime(); }},
+  quarter: { label: '3 Months', fn: ts => { const n = new Date(), s = new Date(n); s.setMonth(n.getMonth()-3); s.setHours(0,0,0,0); return ts >= s.getTime(); }},
+  all: { label: 'All Time', fn: () => true },
+};
+
+// ── State ──
+let state = {
+  tab: 'templates',
+  templates: [],
+  logs: [],
+  period: 'week',
+  openMenu: null,
+};
+
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem('archetype-data'));
+    if (d) { state.templates = d.templates || []; state.logs = d.logs || []; }
+  } catch(e) {}
+}
+
+function save() {
+  localStorage.setItem('archetype-data', JSON.stringify({ templates: state.templates, logs: state.logs }));
+}
+
+// ── Helpers ──
+function chip(id, selected, small) {
+  const a = archMap[id]; if (!a) return '';
+  const bg = selected ? a.color : a.bg;
+  const fg = selected ? '#fff' : a.color;
+  const op = selected ? '' : 'opacity:0.55;';
+  const cls = small ? 'chip' : 'chip chip-lg';
+  return `<span class="${cls}" style="background:${bg};color:${fg};${op}" data-arch="${id}">${a.label}</span>`;
+}
+
+function fmtDate(ts) {
+  return new Date(ts).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// ── Render ──
+const $content = document.getElementById('content');
+const $modalRoot = document.getElementById('modal-root');
+
+function render() {
+  $content.className = state.tab === 'templates' ? 'content has-fab' : 'content';
+
+  if (state.tab === 'templates') renderTemplates();
+  else if (state.tab === 'history') renderHistory();
+  else renderSummary();
+
+  // Tab highlight
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === state.tab);
+  });
+}
+
+function renderTemplates() {
+  if (state.templates.length === 0) {
+    $content.innerHTML = `
+      <div class="empty"><div class="empty-icon">⚡</div><p class="empty-text">Add your first template to start tracking.</p></div>
+      <button class="fab" id="fab-add">+</button>`;
+    return;
+  }
+  let html = '<div class="card-list">';
+  state.templates.forEach(t => {
+    const menuOpen = state.openMenu === t.id;
+    html += `
+      <div class="card" data-action="log" data-id="${t.id}">
+        <div class="card-row">
+          <span class="card-name">${esc(t.name)}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            ${t.weight !== 1 ? `<span class="card-weight">×${t.weight}</span>` : ''}
+            <button class="menu-btn" data-action="menu" data-id="${t.id}">⋯</button>
+          </div>
+        </div>
+        <div class="card-chips">${t.archetypes.map(a => chip(a, true, true)).join('')}</div>
+        ${menuOpen ? `
+          <div class="menu-drop">
+            <button class="menu-item" data-action="edit" data-id="${t.id}">Edit</button>
+            <button class="menu-item danger" data-action="delete" data-id="${t.id}">Delete</button>
+          </div>` : ''}
+      </div>`;
+  });
+  html += '</div><button class="fab" id="fab-add">+</button>';
+  $content.innerHTML = html;
+}
+
+function renderHistory() {
+  if (state.logs.length === 0) {
+    $content.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p class="empty-text">No completed tasks yet.</p></div>';
+    return;
+  }
+  const grouped = {};
+  [...state.logs].reverse().forEach(l => {
+    const key = fmtDate(l.timestamp);
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(l);
+  });
+  let html = '';
+  Object.entries(grouped).forEach(([date, entries]) => {
+    html += `<div class="date-group"><div class="date-head">${date}</div><div class="log-list">`;
+    entries.forEach(l => {
+      html += `
+        <div class="log-card">
+          <div class="log-row" style="margin-bottom:6px">
+            <span class="log-name">${esc(l.taskName)}</span>
+            <span class="log-pts">+${l.totalPoints.toFixed(0)}</span>
+          </div>
+          <div class="log-row">
+            <div class="card-chips">${l.archetypes.map(a => chip(a, true, true)).join('')}</div>
+            <span class="log-detail">${l.effort}m × ${l.weight} + ${l.outcome}</span>
+          </div>
+        </div>`;
+    });
+    html += '</div></div>';
+  });
+  $content.innerHTML = html;
+}
+
+function renderSummary() {
+  const filtered = state.logs.filter(l => PERIODS[state.period].fn(l.timestamp));
+  const totals = {}; ARCHETYPES.forEach(a => { totals[a.id] = 0; });
+  filtered.forEach(l => { l.archetypes.forEach(aId => { totals[aId] = (totals[aId] || 0) + l.pointsPerArchetype; }); });
+  const maxPts = Math.max(...Object.values(totals), 1);
+  const grandTotal = Object.values(totals).reduce((s, v) => s + v, 0);
+
+  let periodHtml = '';
+  Object.entries(PERIODS).forEach(([key, { label }]) => {
+    periodHtml += `<button class="period-btn ${state.period === key ? 'active' : ''}" data-period="${key}">${label}</button>`;
+  });
+
+  let barsHtml = '';
+  ARCHETYPES.forEach(a => {
+    const pts = totals[a.id];
+    const pct = maxPts > 0 ? (pts / maxPts) * 100 : 0;
+    barsHtml += `
+      <div>
+        <div class="bar-head">
+          <span class="bar-name">${a.label}</span>
+          <span class="bar-pts" style="color:${a.color}">${pts.toFixed(0)}</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${a.color}"></div></div>
+      </div>`;
+  });
+
+  $content.innerHTML = `
+    <div class="period-bar">${periodHtml}</div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val">${grandTotal.toFixed(0)}</div><div class="stat-lbl">Total points</div></div>
+      <div class="stat-card"><div class="stat-val">${filtered.length}</div><div class="stat-lbl">Entries</div></div>
+    </div>
+    <div class="bar-group">${barsHtml}</div>`;
+}
+
+// ── Modals ──
+function showTemplateModal(existing) {
+  const name = existing ? existing.name : '';
+  const weight = existing ? existing.weight : 1;
+  const selected = existing ? [...existing.archetypes] : [];
+
+  let archHtml = ARCHETYPES.map(a => {
+    const sel = selected.includes(a.id);
+    return chip(a.id, sel, false);
+  }).join('');
+
+  $modalRoot.innerHTML = `
+    <div class="overlay">
+      <div class="overlay-bg" data-action="close-modal"></div>
+      <div class="modal">
+        <div class="modal-head">
+          <h2 class="modal-title">${existing ? 'Edit Template' : 'New Template'}</h2>
+          <button class="close-btn" data-action="close-modal">×</button>
+        </div>
+        <div class="field">
+          <label class="field-label">Name</label>
+          <input class="input" id="m-name" value="${esc(name)}" placeholder="e.g. Reading" autofocus>
+        </div>
+        <div class="field">
+          <label class="field-label">Weight</label>
+          <input class="input input-sm" id="m-weight" type="number" value="${weight}" min="0.1" step="0.1">
+        </div>
+        <div class="field">
+          <label class="field-label">Archetypes</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px" id="m-archs">${archHtml}</div>
+        </div>
+        <button class="btn-primary" id="m-save" ${!name || selected.length === 0 ? 'disabled' : ''}>${existing ? 'Update' : 'Add Template'}</button>
+      </div>
+    </div>`;
+
+  // State for modal
+  const modalState = { name, weight, archs: selected };
+
+  const updateBtn = () => {
+    const btn = document.getElementById('m-save');
+    btn.disabled = !modalState.name.trim() || modalState.archs.length === 0;
+  };
+
+  const updateChips = () => {
+    document.getElementById('m-archs').innerHTML = ARCHETYPES.map(a =>
+      chip(a.id, modalState.archs.includes(a.id), false)
+    ).join('');
+  };
+
+  document.getElementById('m-name').addEventListener('input', e => { modalState.name = e.target.value; updateBtn(); });
+  document.getElementById('m-weight').addEventListener('input', e => { modalState.weight = e.target.value; updateBtn(); });
+
+  document.getElementById('m-archs').addEventListener('click', e => {
+    const el = e.target.closest('[data-arch]');
+    if (!el) return;
+    const id = el.dataset.arch;
+    if (modalState.archs.includes(id)) modalState.archs = modalState.archs.filter(a => a !== id);
+    else modalState.archs.push(id);
+    updateChips(); updateBtn();
+  });
+
+  document.getElementById('m-save').addEventListener('click', () => {
+    if (!modalState.name.trim() || modalState.archs.length === 0) return;
+    const data = { name: modalState.name.trim(), weight: parseFloat(modalState.weight) || 1, archetypes: modalState.archs };
+    if (existing) {
+      state.templates = state.templates.map(t => t.id === existing.id ? { ...t, ...data } : t);
+    } else {
+      state.templates.push({ ...data, id: Date.now().toString() });
+    }
+    save(); closeModal(); render();
+  });
+
+  // Focus
+  setTimeout(() => document.getElementById('m-name').focus(), 100);
+}
+
+function showLogModal(template) {
+  const archCount = template.archetypes.length;
+
+  $modalRoot.innerHTML = `
+    <div class="overlay">
+      <div class="overlay-bg" data-action="close-modal"></div>
+      <div class="modal">
+        <div class="modal-head">
+          <h2 class="modal-title">Log Activity</h2>
+          <button class="close-btn" data-action="close-modal">×</button>
+        </div>
+        <p style="font-size:14px;color:#64748b;margin:0 0 20px">${esc(template.name)} <span style="color:#94a3b8">×${template.weight}</span></p>
+        <div class="field-row">
+          <div class="field" style="flex:1">
+            <label class="field-label">Effort (min)</label>
+            <input class="input" id="l-effort" type="number" placeholder="25" min="1" autofocus style="text-align:center">
+          </div>
+          <div class="field" style="flex:1">
+            <label class="field-label">Outcome</label>
+            <input class="input" id="l-outcome" type="number" placeholder="0" value="0" style="text-align:center">
+          </div>
+        </div>
+        <div class="preview">
+          <div class="preview-row">
+            <span class="preview-label">Total</span>
+            <span class="preview-value" id="l-total">0</span>
+          </div>
+          <div class="preview-split" id="l-split">
+            ${template.archetypes.map(aId => `<span class="preview-arch" style="color:${archMap[aId].color}">${archMap[aId].label} +0</span>`).join('')}
+          </div>
+        </div>
+        <button class="btn-primary" id="l-save" disabled>Log</button>
+      </div>
+    </div>`;
+
+  const update = () => {
+    const effort = parseFloat(document.getElementById('l-effort').value) || 0;
+    const outcome = parseFloat(document.getElementById('l-outcome').value) || 0;
+    const total = effort * template.weight + outcome;
+    const per = archCount > 0 ? total / archCount : 0;
+    document.getElementById('l-total').textContent = total.toFixed(0);
+    document.getElementById('l-split').innerHTML = template.archetypes.map(aId =>
+      `<span class="preview-arch" style="color:${archMap[aId].color}">${archMap[aId].label} +${per.toFixed(0)}</span>`
+    ).join('');
+    document.getElementById('l-save').disabled = !(effort > 0);
+  };
+
+  document.getElementById('l-effort').addEventListener('input', update);
+  document.getElementById('l-outcome').addEventListener('input', update);
+
+  document.getElementById('l-save').addEventListener('click', () => {
+    const effort = parseFloat(document.getElementById('l-effort').value) || 0;
+    const outcome = parseFloat(document.getElementById('l-outcome').value) || 0;
+    if (effort <= 0) return;
+    const total = effort * template.weight + outcome;
+    const per = archCount > 0 ? total / archCount : 0;
+    state.logs.push({
+      id: Date.now().toString(),
+      templateId: template.id,
+      taskName: template.name,
+      effort, outcome,
+      weight: template.weight,
+      archetypes: template.archetypes,
+      totalPoints: total,
+      pointsPerArchetype: per,
+      timestamp: Date.now(),
+    });
+    save(); closeModal(); render();
+  });
+
+  setTimeout(() => document.getElementById('l-effort').focus(), 100);
+}
+
+function closeModal() { $modalRoot.innerHTML = ''; }
+
+// ── Events ──
+document.querySelector('.tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  state.tab = tab.dataset.tab;
+  state.openMenu = null;
+  render();
+});
+
+$content.addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) { state.openMenu = null; render(); return; }
+
+  const action = btn.dataset.action;
+  const id = btn.dataset.id;
+
+  if (action === 'menu') { e.stopPropagation(); state.openMenu = state.openMenu === id ? null : id; render(); return; }
+  if (action === 'edit') { const t = state.templates.find(x => x.id === id); if (t) showTemplateModal(t); state.openMenu = null; return; }
+  if (action === 'delete') { state.templates = state.templates.filter(x => x.id !== id); state.openMenu = null; save(); render(); return; }
+  if (action === 'log') {
+    if (state.openMenu) { state.openMenu = null; render(); return; }
+    const t = state.templates.find(x => x.id === id); if (t) showLogModal(t); return;
+  }
+
+  if (btn.dataset.period) { state.period = btn.dataset.period; render(); }
+});
+
+// Period buttons (delegated from content)
+$content.addEventListener('click', e => {
+  const pb = e.target.closest('[data-period]');
+  if (pb) { state.period = pb.dataset.period; render(); }
+});
+
+// FAB
+$content.addEventListener('click', e => {
+  if (e.target.id === 'fab-add' || e.target.closest('#fab-add')) showTemplateModal(null);
+});
+
+// Modal backdrop close
+$modalRoot.addEventListener('click', e => {
+  if (e.target.closest('[data-action="close-modal"]')) closeModal();
+});
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ── Init ──
+load();
+render();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
